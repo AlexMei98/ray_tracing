@@ -4,7 +4,7 @@
 
 #include "hitable.hpp"
 #include "hitables/sphere.hpp"
-#include "hitables/histable_list.hpp"
+#include "hitables/hitable_list.hpp"
 
 #include "materials/lambertian.hpp"
 
