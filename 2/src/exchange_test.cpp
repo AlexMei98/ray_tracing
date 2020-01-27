@@ -57,7 +57,7 @@ hitable *cornell_scene() {
 }
 
 int main(int argv, char *argc[]) {
-    int nx = 1920, ny = 1080, ns = 120;
+    int nx = 800, ny = 800, ns = 8000;
     std::ofstream fout = get_out(argc);
     fout << "P3\n" << nx << " " << ny << "\n255\n";
 

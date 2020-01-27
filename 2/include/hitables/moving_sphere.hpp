@@ -54,6 +54,9 @@ vec3 moving_sphere::center(double time) const {
 }
 
 bool moving_sphere::bounding_box(double t0, double t1, aabb &box) const {
+    aabb box0(center(t0) - vec3(radius, radius, radius), center(t0) + vec3(radius, radius, radius));
+    aabb box1(center(t1) - vec3(radius, radius, radius), center(t1) + vec3(radius, radius, radius));
+    box = surrounding_box(box0, box1);
     return true;
 }
 
