@@ -124,22 +124,5 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 ### JetBrains Patch ###
-# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
-
-# *.iml
-# modules.xml
-# .idea/misc.xml
-# *.ipr
-
-# Sonarlint plugin
-.idea/**/sonarlint/
-
-# SonarQube Plugin
-.idea/**/sonarIssues.xml
-
-# Markdown Navigator plugin
-.idea/**/markdown-navigator.xml
-.idea/**/markdown-navigator/
-
-# End of https://www.gitignore.io/api/c++,cmake,jetbrains
-
+.idea
+**/.idea
