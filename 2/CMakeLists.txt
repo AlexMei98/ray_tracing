@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(ray_tracing)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories(include)
+add_executable(motion_test src/motion_test.cpp)
+add_executable(texture_test src/texture_test.cpp)
+add_executable(noise_test src/noise_test.cpp)
+add_executable(interp_test src/interp_test.cpp)
+add_executable(scale_test src/scale_test.cpp)
+add_executable(turb_test src/turb_test.cpp)
+add_executable(earth_test src/earth_test.cpp)
