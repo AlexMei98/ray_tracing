@@ -1,3 +1,8 @@
+#include <thread>
+#include <mutex>
+#include <unistd.h>
+#include <chrono>
+
 #include "ray.hpp"
 #include "util.hpp"
 #include "camera.hpp"
@@ -25,6 +30,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "stb_image.hpp"
+
+#define time_stub(t) auto t = std::chrono::system_clock::now()
+#define delta(start, end) std::chrono::duration<double>(end - start).count()
+
+
+int x, y, s, p, total;
+vec3 *map;
+bool *flag;
+volatile int front = 0;
+std::mutex mut;
+std::ofstream fout;
 
 vec3 color(const ray &r, hitable *world, int depth) {
     hit_record rec;
@@ -89,33 +105,88 @@ hitable *final_scene() {
     return new hitable_list(list, l);
 }
 
-int main(int argv, char *argc[]) {
-    int nx = 1920, ny = 1080, ns = 10000;
-    std::ofstream fout = get_out(argc);
-    fout << "P3\n" << nx << " " << ny << "\n255\n";
+void compute(camera cam, hitable *world) {
+    while (true) {
+        int cur;
+        {
+            std::lock_guard<std::mutex> guard_front(mut);
+            if (front < total) {
+                cur = front++;
+            } else {
+                break;
+            }
+        }
 
+        int tx = cur % x, ty = y - 1 - cur / x;
+        for (int is = 0; is < s; is++) {
+            double u = (double(tx) + drand48()) / double(x);
+            double v = (double(ty) + drand48()) / double(y);
+            map[cur] += color(cam.get_ray(u, v), world, 0);
+        }
+        map[cur] /= double(s);
+        for (int i = 0; i < 3; i++) {
+            map[cur][i] = sqrt(map[cur][i]);
+        }
+        flag[cur] = true;
+    }
+}
+
+void final() {
+    int cur = 0;
+    fout << "P3\n" << x << " " << y << "\n255\n";
+    while (cur < total) {
+        if (flag[cur]) {
+            int ir = int(255.99 * map[cur][0]);
+            int ig = int(255.99 * map[cur][1]);
+            int ib = int(255.99 * map[cur][2]);
+            fout << ir << " " << ig << " " << ib << "\n";
+            fout.flush();
+            cur++;
+            if (cur % 10000 == 0) {
+                std::cout << "finish " << cur << " / " << total << std::endl;
+                std::cout.flush();
+            }
+        } else {
+            usleep(10);
+        }
+    }
+}
+
+int main(int argv, char *argc[]) {
+    x = 2 * s2i(argc[1]), y = 2 * s2i(argc[2]), s = s2i(argc[3]), p = s2i(argc[4]);
+    total = x * y;
+    flag = new bool[total];
+    std::memset(flag, 0, sizeof(bool));
+    map = new vec3[total];
+    front = 0;
+
+    fout = get_out(argc);
     vec3 look_from(478, 278, -600);
     vec3 look_at(278, 278, 0);
     double dist_to_focus = (look_at - look_from).length();
     double aperture = 0.0;
     double fov = 40.0;
-    camera cam(look_from, look_at, vec3(0, 1, 0), fov, double(nx) / double(ny), aperture, dist_to_focus, 0.0, 1.0);
+    camera cam(look_from, look_at, vec3(0, 1, 0), fov, double(x) / double(y), aperture, dist_to_focus, 0.0, 1.0);
+    time_stub(scene_start);
     hitable *world = final_scene();
-    for (int j = ny - 1; j > 0; j--) {
-        for (int i = 0; i < nx; i++) {
-            vec3 col(0, 0, 0);
-            for (int s = 0; s < ns; s++) {
-                double u = (double(i) + drand48()) / double(nx);
-                double v = (double(j) + drand48()) / double(ny);
-                col += color(cam.get_ray(u, v), world, 0);
-            }
-            col /= double(ns);
-            col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-            int ir = int(255.99 * col[0]);
-            int ig = int(255.99 * col[1]);
-            int ib = int(255.99 * col[2]);
-            fout << ir << " " << ig << " " << ib << "\n";
-        }
+    time_stub(scene_end);
+    std::cout << delta(scene_start, scene_end) << std::endl;
+
+    std::cout << "process" << std::endl;
+    std::cout.flush();
+    std::thread t[p];
+
+    time_stub(process_start);
+    for (int i = 0; i < p; ++i) {
+        t[i] = std::thread(compute, cam, world);
     }
+    std::thread out(final);
+    for (int i = 0; i < p; ++i) {
+        t[i].join();
+    }
+    out.join();
+    time_stub(process_end);
+    std::cout << delta(process_start, process_end) << std::endl;
+
     return 0;
 }

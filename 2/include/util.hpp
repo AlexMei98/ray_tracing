@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstring>
 
 #include "vec3.hpp"
 #include "aabb.hpp"
@@ -54,14 +55,14 @@ vec3 random_in_unit_disk() {
 
 aabb surrounding_box(aabb box0, aabb box1) {
     vec3 small(
-            fmin(box0.min().x(), box1.min().x()),
-            fmin(box0.min().y(), box1.min().y()),
-            fmin(box0.min().z(), box1.min().z())
+            ddmin(box0.min().x(), box1.min().x()),
+            ddmin(box0.min().y(), box1.min().y()),
+            ddmin(box0.min().z(), box1.min().z())
     );
     vec3 big(
-            fmax(box0.min().x(), box1.min().x()),
-            fmax(box0.min().y(), box1.min().y()),
-            fmax(box0.min().z(), box1.min().z())
+            ddmax(box0.max().x(), box1.max().x()),
+            ddmax(box0.max().y(), box1.max().y()),
+            ddmax(box0.max().z(), box1.max().z())
     );
 
     return {small, big};
@@ -72,6 +73,15 @@ void get_sphere_uv(const vec3 &p, double &u, double &v) {
     double theta = asin(p.y());
     u = 1 - (phi + M_PI) / (2 * M_PI);
     v = (theta + M_PI / 2) / M_PI;
+}
+
+int s2i(char *c) {
+    int t = 0;
+    int len = std::strlen(c);
+    for (int i = 0; i < len; i++) {
+        t = t * 10 + int(c[i] - '0');
+    }
+    return t;
 }
 
 #endif // UTIL_H

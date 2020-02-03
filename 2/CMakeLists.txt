@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(ray_tracing)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 include_directories(include)
 add_executable(motion_test src/motion_test.cpp)
@@ -18,3 +19,4 @@ add_executable(box_test src/box_test.cpp)
 add_executable(exchange_test src/exchange_test.cpp)
 add_executable(medium_test src/medium_test.cpp)
 add_executable(final_test src/final_test.cpp)
+add_executable(final_test_pthread src/final_test_pthread.cpp)

@@ -20,7 +20,7 @@ vec3 noise_texture::value(double u, double v, const vec3 &p) const {
 //    return vec3(1, 1, 1) * 0.5 * (1 + noise.noise(scale * p));
 //    return vec3(1, 1, 1) * 0.5 * (1 + noise.turb(scale * p));
 //    return vec3(1, 1, 1) * noise.turb(scale * p);
-    return vec3(1, 1, 1) * 0.5 * (1 + sin(scale * p.z() + 10 * noise.turb(p)));
+    return vec3(1, 1, 1) * 0.5 * (1 + sin(scale * (p.x() + p.z()) / 2 + 10 * noise.turb(p)));
 }
 
 #endif // NOISE_HPP
