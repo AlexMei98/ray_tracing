@@ -8,8 +8,8 @@
 #include "vec3.hpp"
 #include "aabb.hpp"
 
-std::ofstream get_out(char *argv[]) {
-    std::string name(argv[0]);
+std::ofstream get_out(char *f) {
+    std::string name(f);
     name += ".ppm";
     std::ofstream fout(name);
     return fout;
